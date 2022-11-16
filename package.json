@@ -1,0 +1,46 @@
+{
+  "name": "glean-slab",
+  "version": "1.0.0",
+  "description": "Sync Slab documents with Glean",
+  "main": "build/index.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "prebuild": "rimraf ./build",
+    "build": "tsc",
+    "predev": "yarn build",
+    "dev": "yarn start",
+    "prepare": "husky install",
+    "prettier": "prettier --check 'src/**/*.{js,jsx,ts,tsx}'",
+    "prettier:fix": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
+    "start": "node build/index.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "eslint": "^7.7.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-import-resolver-typescript": "^2.7.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.9.3"
+  },
+  "prettier": {
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "printWidth": 100,
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all",
+    "useTabs": false
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  }
+}

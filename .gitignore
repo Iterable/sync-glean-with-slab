@@ -1,0 +1,37 @@
+/node_modules/*
+/build/*
+/coverage/*
+/reports/*
+/src/__mockData__/*.json
+!/src/__mockData__/mockCampaignFolderData.json
+!/src/__mockData__/mockTemplateFolderData.json
+*.swp
+.DS_Store
+junit.xml
+yarn-error.log
+.idea/
+iterable-frontend.iml
+.npmrc
+.vs/
+.vscode/
+.swc/*
+/target/*
+
+# Styleguide related stuff
+config/styleguide
+public/styleguide
+storybook-static
+build-storybook.log
+
+# Test-related stuff
+test-reports/
+
+# Cypress component testing
+.nyc_output/
+results/
+cypress/videos/
+cypress/downloads/
+cypress/screenshots/
+
+# Chrome extension metadata
+extensions/local-development/chrome/_metadata/
