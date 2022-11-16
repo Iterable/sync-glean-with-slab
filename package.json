@@ -2,6 +2,7 @@
   "name": "glean-slab",
   "version": "1.0.0",
   "description": "Sync Slab documents with Glean",
+  "type": "module",
   "main": "build/index.js",
   "license": "UNLICENSED",
   "private": true,
@@ -15,8 +16,15 @@
     "prettier:fix": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
     "start": "node build/index.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "date-fns": "^2.29.3",
+    "dotenv-safe": "^8.2.0",
+    "got": "^12.5.3",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.0.0"
+  },
   "devDependencies": {
+    "@types/dotenv-safe": "^8.1.2",
     "@types/node": "^18.11.9",
     "eslint": "^7.7.0",
     "eslint-config-airbnb-base": "^14.2.0",
