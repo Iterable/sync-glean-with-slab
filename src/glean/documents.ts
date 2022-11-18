@@ -61,6 +61,12 @@ const attachDatasourceTo =
   (datasource: string) =>
   (document: Document): DocumentWithDatasource => ({ ...document, datasource });
 
+  export const getDocumentCount = async (datasource: string) =>
+  post('getdocumentcount', { datasource });
+
+  export const forceProcessing = async (datasource: string) =>
+  post('processalldocuments', { datasource });
+
 export const addDocument = async (document: Document, datasource: string) =>
   post('indexdocument', { document: attachDatasource(document, datasource) });
 

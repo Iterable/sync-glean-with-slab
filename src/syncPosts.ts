@@ -1,5 +1,5 @@
 import { getUnixTime, parseISO } from 'date-fns';
-import { syncDocuments, Document, DocumentPermissions, PAGE } from "./glean/index.js";
+import { forceProcessing, syncDocuments, Document, DocumentPermissions, PAGE } from "./glean/index.js";
 import { getPosts, LinkAccess, Post, PostContent } from "./slab/index.js";
 import { DataSource } from "./datasource.js";
 
@@ -97,10 +97,17 @@ export const ingestSlabPosts = async (uploadId: string) => {
 
   const batches = chunk(posts.filter(filterUnpublished));
   const last = batches.length - 1;
-  await Promise.all(batches.map((docs, index) => {
-    console.info(`Syncing Slab posts batch ${index + 1} of ${last + 1} to Glean`);
+  await Promise.all(batches.map(async (docs, index) => {
     const currentPage = (index === 0) ? PAGE.first : (index == last) ? PAGE.last : undefined;
+    console.info(`Syncing Slab posts batch ${index + 1} of ${last + 1} to Glean (${currentPage})`);
+    return Promise.resolve();
     return syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId, currentPage);
   }));
+
+  try {
+    await forceProcessing(DataSource.name);
+  } catch (error: any) {
+    console.warn(error?.response?.body ?? 'Failed to force indexing');
+  }
   console.info('Finishes posts sync');
 }
