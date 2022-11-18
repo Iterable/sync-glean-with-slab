@@ -3,11 +3,10 @@ import { forceProcessing, syncDocuments, Document, DocumentPermissions, PAGE } f
 import { getPosts, LinkAccess, Post, PostContent } from "./slab/index.js";
 import { DataSource } from "./datasource.js";
 
-const chunk = <T>(arr: T[], size = 100) =>
+const chunk = <T>(arr: T[], size = 50) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
     arr.slice(i * size, i * size + size)
   );
-
 
 const convertToEpoch = (value: string): number => getUnixTime(parseISO(value));
 
@@ -80,10 +79,11 @@ const filterUnpublished = (post: Post): boolean => Boolean(post.publishedAt) && 
 const fetchPosts = async () => {
   try {
     console.info('Fetching all posts from Slab');
-    return getPosts();
-  } catch (error) {
+    const response = await getPosts();
+    return response;
+  } catch (error: any) {
     console.error('Unable to fetch posts from Slab');
-    console.trace(error);
+    console.trace(error?.response?.error);
     return;
   }
 }
@@ -96,13 +96,16 @@ export const ingestSlabPosts = async (uploadId: string) => {
   }
 
   const batches = chunk(posts.filter(filterUnpublished));
-  const last = batches.length - 1;
-  await Promise.all(batches.map(async (docs, index) => {
-    const currentPage = (index === 0) ? PAGE.first : (index == last) ? PAGE.last : undefined;
-    console.info(`Syncing Slab posts batch ${index + 1} of ${last + 1} to Glean (${currentPage})`);
-    return Promise.resolve();
-    return syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId, currentPage);
-  }));
+  console.info(`Example content: ${batches[0][0].content}`)
+  const last = batches.length;
+  const requests = batches.map(async (docs, index) => {
+    const oneIndex = index + 1;
+    const currentPage = (oneIndex === 1) ? PAGE.first : (oneIndex == last) ? PAGE.last : undefined;
+    console.info(`Syncing Slab posts batch ${oneIndex} of ${last} to Glean (${currentPage})`);
+    await syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId, currentPage);
+  });
+
+  await Promise.all(requests);
 
   try {
     await forceProcessing(DataSource.name);
