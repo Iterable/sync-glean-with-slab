@@ -27,7 +27,7 @@ export interface PostContent {
 export interface Post {
   id: string;
   title: string;
-  content: PostContent[];
+  content: string;
   publishedAt?: string;
   updatedAt?: string;
   archivedAt?: string;
@@ -35,7 +35,7 @@ export interface Post {
   owner: ContentOwner;
 }
 
-interface PostssResponse {
+interface PostsResponse {
   organization: {
     posts: Post[];
   };
@@ -61,7 +61,34 @@ const postsQuery = gql`
 `;
 
 export const getPosts = async () => {
-  const results = await slabApi.request<PostssResponse>(postsQuery);
+  const results = await slabApi.request<PostsResponse>(postsQuery);
 
   return results.organization.posts;
+};
+
+interface PostResponse {
+  post: Post;
+}
+
+const getPostQuery = gql`
+  query ($id: ID!) {
+    post(id: $id) {
+      id
+      title
+      content
+      publishedAt
+      updatedAt
+      archivedAt
+      linkAccess
+      owner {
+        id
+      }
+    }
+  }
+`;
+
+export const getPost = async (id: string) => {
+  const results = await slabApi.request<PostResponse>(getPostQuery, { id });
+
+  return results.post;
 };

@@ -12,3 +12,4 @@ export const SYNC_USERS = false;
 export const SYNC_POSTS = true;
 export const GET_DOCS_COUNT = false;
 export const IS_TEST = true;
+export const FORCE_REUPLOAD = true;

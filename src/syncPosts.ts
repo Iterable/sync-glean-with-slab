@@ -1,6 +1,6 @@
 import { getUnixTime, parseISO } from 'date-fns';
-import { forceProcessing, syncDocuments, Document, DocumentPermissions, PAGE } from "./glean/index.js";
-import { getPosts, LinkAccess, Post, PostContent } from "./slab/index.js";
+import { forceProcessing, addDocument, syncDocuments, Document, DocumentPermissions, PAGE } from "./glean/index.js";
+import { getPost, getPosts, LinkAccess, Post, PostContent } from "./slab/index.js";
 import { DataSource } from "./datasource.js";
 
 const chunk = <T>(arr: T[], size = 50) =>
@@ -45,19 +45,30 @@ const getDocumentPerommsions = (post: Post): DocumentPermissions => {
   };
 }
 
-const getContentBody = (content: PostContent | PostContent[]): string => {
-  if (!content) {
-    return "";
+const getContentBody = (content: string): string => {
+  try {
+    const parsedContent: PostContent | PostContent[] = JSON.parse(content);
+    
+    if (!parsedContent) {
+      console.warn("No content found for post");
+      return "";
+    }
+
+    if (Array.isArray(parsedContent)) {
+      const body = parsedContent.map(p => p.insert).join("");
+      // console.info("Found content", body);
+      return body;
+    }
+  
+    return parsedContent.insert || "";
+  } catch (e) {
+    console.error("Could not parse that body");
   }
 
-  if (Array.isArray(content)) {
-    return content.map(p => p.insert).join("");
-  }
-
-  return content.insert || "";
+  return "";
 }
 
-const mapPostToGlean = (post: Post): Document => ({
+export const mapPostToGlean = (post: Post): Document => ({
   id: post.id,
   title: post.title,
   body: {
@@ -96,16 +107,27 @@ export const ingestSlabPosts = async (uploadId: string) => {
   }
 
   const batches = chunk(posts.filter(filterUnpublished));
-  console.info(`Example content: ${batches[0][0].content}`)
-  const last = batches.length;
-  const requests = batches.map(async (docs, index) => {
-    const oneIndex = index + 1;
-    const currentPage = (oneIndex === 1) ? PAGE.first : (oneIndex == last) ? PAGE.last : undefined;
-    console.info(`Syncing Slab posts batch ${oneIndex} of ${last} to Glean (${currentPage})`);
-    await syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId, currentPage);
-  });
+  const total = batches.length;
 
+  // Ensure the first batch is submitted before sending the rest en masse
+  const [first, ...rest] = batches;
+  const last = rest.pop();
+  console.info(`Syncing Slab posts batch 1 of ${total} to Glean (FIRST)`);
+  await syncDocuments(first.map(mapPostToGlean), DataSource.name, uploadId, PAGE.first);
+  
+  const requests = rest.map(async (docs, index) => {
+    const oneIndex = index + 2;
+    
+    console.info(`Syncing Slab posts batch ${oneIndex} of ${total} to Glean`);
+    await syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId);
+  });
   await Promise.all(requests);
+
+  // Ensure the last batch is submitted AFTER the rest is sent en masse
+  if (last) {
+    console.info(`Syncing Slab posts batch 1 of ${total} to Glean (LAST)`);
+    await syncDocuments(last.map(mapPostToGlean), DataSource.name, uploadId, PAGE.last);
+  }
 
   try {
     await forceProcessing(DataSource.name);

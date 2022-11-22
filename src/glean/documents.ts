@@ -1,4 +1,5 @@
 import { post } from './api.js';
+import { FORCE_REUPLOAD } from '../constants.js';
 
 interface ContentDefinition {
   mimeType?: string;
@@ -47,6 +48,15 @@ interface DocumentWithDatasource extends Document {
   datasource: string;
 }
 
+interface BulkIndexContainer {
+  uploadId: string;
+  documents: Document[];
+  datasource: string;
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  forceRestartUpload?: boolean;
+}
+
 export enum PAGE {
   first,
   last,
@@ -61,10 +71,10 @@ const attachDatasourceTo =
   (datasource: string) =>
   (document: Document): DocumentWithDatasource => ({ ...document, datasource });
 
-  export const getDocumentCount = async (datasource: string) =>
+export const getDocumentCount = async (datasource: string) =>
   post('getdocumentcount', { datasource });
 
-  export const forceProcessing = async (datasource: string) =>
+export const forceProcessing = async (datasource: string) =>
   post('processalldocuments', { datasource });
 
 export const addDocument = async (document: Document, datasource: string) =>
@@ -73,6 +83,17 @@ export const addDocument = async (document: Document, datasource: string) =>
 export const addDocumentTo = (datasource: string) => async (document: Document) =>
   addDocument(document, datasource);
 
+const attachForceRepload = (body: BulkIndexContainer): BulkIndexContainer => {
+  if (!FORCE_REUPLOAD) {
+    return body;
+  }
+
+  return {
+    ...body,
+    forceRestartUpload: body.isFirstPage,
+  };
+};
+
 export const syncDocuments = async (
   documents: Document[],
   datasource: string,
@@ -80,13 +101,16 @@ export const syncDocuments = async (
   currentPage?: PAGE,
 ) => {
   try {
-    await post('bulkindexdocuments', {
-      uploadId,
-      documents: documents.map(attachDatasourceTo(datasource)),
-      datasource,
-      isFirstPage: currentPage === PAGE.first,
-      isLastPage: currentPage === PAGE.last,
-    });
+    await post(
+      'bulkindexdocuments',
+      attachForceRepload({
+        uploadId,
+        documents: documents.map(attachDatasourceTo(datasource)),
+        datasource,
+        isFirstPage: currentPage === PAGE.first,
+        isLastPage: currentPage === PAGE.last,
+      }),
+    );
   } catch (error: any) {
     console.error('Bulk document upload to Glean failed');
     console.trace(error?.response?.body);
