@@ -1,11 +1,18 @@
 import { getUnixTime, parseISO } from 'date-fns';
-import { forceProcessing, addDocument, syncDocuments, Document, DocumentPermissions, PAGE } from "./glean/index.js";
-import { getPost, getPosts, LinkAccess, Post, PostContent } from "./slab/index.js";
-import { DataSource } from "./datasource.js";
+import {
+  forceProcessing,
+  addDocument,
+  syncDocuments,
+  Document,
+  DocumentPermissions,
+  PAGE,
+} from './glean/index.js';
+import { getPost, getPosts, LinkAccess, Post, PostContent } from './slab/index.js';
+import { DataSource } from './datasource.js';
 
 const chunk = <T>(arr: T[], size = 50) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-    arr.slice(i * size, i * size + size)
+    arr.slice(i * size, i * size + size),
   );
 
 const convertToEpoch = (value: string): number => getUnixTime(parseISO(value));
@@ -20,59 +27,61 @@ const getPostStatus = (post: Post): string => {
   }
 
   return '';
-}
+};
 
 const getDocumentPerommsions = (post: Post): DocumentPermissions => {
   // Only allow owners to see a post if it is not published or it's marked as hidden
   if (!post.publishedAt || post.linkAccess == LinkAccess.disabled) {
     return {
-      allowedUsers: [{
-        datasourceUserId: post.owner.id,
-      }]
-    }
+      allowedUsers: [
+        {
+          datasourceUserId: post.owner.id,
+        },
+      ],
+    };
   }
 
   // Expose to all users if marked as public
   if (post.linkAccess == LinkAccess.public) {
     return {
       allowAnonymousAccess: true,
-    }
+    };
   }
 
   // Otherwise, allow all Slab users
   return {
     allowAllDatasourceUsersAccess: true,
   };
-}
+};
 
 const getContentBody = (content: string): string => {
   try {
     const parsedContent: PostContent | PostContent[] = JSON.parse(content);
-    
+
     if (!parsedContent) {
-      console.warn("No content found for post");
-      return "";
+      console.warn('No content found for post');
+      return '';
     }
 
     if (Array.isArray(parsedContent)) {
-      const body = parsedContent.map(p => p.insert).join("");
+      const body = parsedContent.map((p) => p.insert).join('');
       // console.info("Found content", body);
       return body;
     }
-  
-    return parsedContent.insert || "";
+
+    return parsedContent.insert || '';
   } catch (e) {
-    console.error("Could not parse that body");
+    console.error('Could not parse that body');
   }
 
-  return "";
-}
+  return '';
+};
 
 export const mapPostToGlean = (post: Post): Document => ({
   id: post.id,
   title: post.title,
   body: {
-    mimeType: "text/plain",
+    mimeType: 'text/plain',
     textContent: getContentBody(post.content),
   },
   owner: {
@@ -85,7 +94,8 @@ export const mapPostToGlean = (post: Post): Document => ({
   status: getPostStatus(post),
 });
 
-const filterUnpublished = (post: Post): boolean => Boolean(post.publishedAt) && getContentBody(post.content).length > 0;
+const filterUnpublished = (post: Post): boolean =>
+  Boolean(post.publishedAt) && getContentBody(post.content).length > 0;
 
 const fetchPosts = async () => {
   try {
@@ -97,7 +107,7 @@ const fetchPosts = async () => {
     console.trace(error?.response?.error);
     return;
   }
-}
+};
 
 export const ingestSlabPosts = async (uploadId: string) => {
   const posts = await fetchPosts();
@@ -114,10 +124,10 @@ export const ingestSlabPosts = async (uploadId: string) => {
   const last = rest.pop();
   console.info(`Syncing Slab posts batch 1 of ${total} to Glean (FIRST)`);
   await syncDocuments(first.map(mapPostToGlean), DataSource.name, uploadId, PAGE.first);
-  
+
   const requests = rest.map(async (docs, index) => {
     const oneIndex = index + 2;
-    
+
     console.info(`Syncing Slab posts batch ${oneIndex} of ${total} to Glean`);
     await syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId);
   });
@@ -125,7 +135,7 @@ export const ingestSlabPosts = async (uploadId: string) => {
 
   // Ensure the last batch is submitted AFTER the rest is sent en masse
   if (last) {
-    console.info(`Syncing Slab posts batch 1 of ${total} to Glean (LAST)`);
+    console.info(`Syncing Slab posts batch ${total} of ${total} to Glean (LAST)`);
     await syncDocuments(last.map(mapPostToGlean), DataSource.name, uploadId, PAGE.last);
   }
 
@@ -135,4 +145,4 @@ export const ingestSlabPosts = async (uploadId: string) => {
     console.warn(error?.response?.body ?? 'Failed to force indexing');
   }
   console.info('Finishes posts sync');
-}
+};
