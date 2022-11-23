@@ -1,16 +1,16 @@
 import { getUnixTime, parseISO } from 'date-fns';
 import {
   forceProcessing,
-  addDocument,
   syncDocuments,
   Document,
   DocumentPermissions,
   PAGE,
 } from './glean/index.js';
-import { getPost, getPosts, LinkAccess, Post, PostContent } from './slab/index.js';
-import { DataSource } from './datasource.js';
+import { getPosts, LinkAccess, Post, PostContent } from './slab/index.js';
+import { DataSource, PostType } from './datasource.js';
+import { BATCH_SIZE } from './constants.js';
 
-const chunk = <T>(arr: T[], size = 50) =>
+const chunk = <T>(arr: T[], size = BATCH_SIZE) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
     arr.slice(i * size, i * size + size),
   );
@@ -80,6 +80,7 @@ const getContentBody = (content: string): string => {
 export const mapPostToGlean = (post: Post): Document => ({
   id: post.id,
   title: post.title,
+  objectType: PostType.name,
   body: {
     mimeType: 'text/plain',
     textContent: getContentBody(post.content),
@@ -121,23 +122,24 @@ export const ingestSlabPosts = async (uploadId: string) => {
 
   // Ensure the first batch is submitted before sending the rest en masse
   const [first, ...rest] = batches;
-  const last = rest.pop();
   console.info(`Syncing Slab posts batch 1 of ${total} to Glean (FIRST)`);
-  await syncDocuments(first.map(mapPostToGlean), DataSource.name, uploadId, PAGE.first);
+  let promise = syncDocuments(first.map(mapPostToGlean), DataSource.name, uploadId, PAGE.first);
 
-  const requests = rest.map(async (docs, index) => {
+  rest.forEach((docs, index) => {
     const oneIndex = index + 2;
+    const last = oneIndex === total;
 
     console.info(`Syncing Slab posts batch ${oneIndex} of ${total} to Glean`);
-    await syncDocuments(docs.map(mapPostToGlean), DataSource.name, uploadId);
+    promise = promise.then(() =>
+      syncDocuments(
+        docs.map(mapPostToGlean),
+        DataSource.name,
+        uploadId,
+        last ? PAGE.last : undefined,
+      ),
+    );
   });
-  await Promise.all(requests);
-
-  // Ensure the last batch is submitted AFTER the rest is sent en masse
-  if (last) {
-    console.info(`Syncing Slab posts batch ${total} of ${total} to Glean (LAST)`);
-    await syncDocuments(last.map(mapPostToGlean), DataSource.name, uploadId, PAGE.last);
-  }
+  await promise;
 
   try {
     await forceProcessing(DataSource.name);

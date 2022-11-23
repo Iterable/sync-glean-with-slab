@@ -29,8 +29,12 @@ export enum DocumentType {
   EXTERNAL_SHORTCUT = 'EXTERNAL_SHORTCUT',
 }
 
+export enum RenderPreset {
+  WEB = 'web',
+  GDRIVE = 'gdrive'
+}
 
-interface CustomDocument {
+export interface CustomDocument {
   name: string;
   displayName?: string;
   docCategory?: DocumentType;
@@ -50,20 +54,14 @@ export interface DataSource {
   isEntityDatasource?: boolean;
   isTestDatasource?: boolean;
   objectDefinitions?: CustomDocument[];
+  renderConfigPreset?: RenderPreset;
 }
 
 export const addDataSource = async (source: DataSource) => post('adddatasource', source);
 
-export const getDataSource = async (id: string) => get('getdatasourceconfig', { datasource: id });
+export const getDataSource = async (id: string) => post('getdatasourceconfig', { datasource: id });
 
 export const ensureDataSource = async (source: DataSource) => {
-  try {
-    const existing = await getDataSource(source.name);
-    return true;
-  } catch {
-    // Nothing
-  }
-
   try {
     await addDataSource(source);
     return true;

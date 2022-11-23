@@ -30,6 +30,7 @@ export interface Document {
   datasource?: string;
   id: string;
   title: string;
+  objectType?: string;
   viewURL: string;
   summary?: ContentDefinition;
   body?: ContentDefinition;
@@ -55,6 +56,7 @@ interface BulkIndexContainer {
   isFirstPage: boolean;
   isLastPage: boolean;
   forceRestartUpload?: boolean;
+  disableStaleDocumentDeletionCheck?: boolean;
 }
 
 export enum PAGE {
@@ -113,6 +115,25 @@ export const syncDocuments = async (
     );
   } catch (error: any) {
     console.error('Bulk document upload to Glean failed');
+    console.trace(error?.response?.body);
+  }
+};
+
+export const nukeDocuments = async (datasource: string, uploadId: string) => {
+  try {
+    await post(
+      'bulkindexdocuments',
+      attachForceRepload({
+        uploadId,
+        documents: [],
+        datasource,
+        isFirstPage: true,
+        isLastPage: true,
+        disableStaleDocumentDeletionCheck: true,
+      }),
+    );
+  } catch (error: any) {
+    console.error('Bulk document deletion inf Glean failed');
     console.trace(error?.response?.body);
   }
 };
