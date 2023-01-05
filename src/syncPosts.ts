@@ -29,7 +29,7 @@ const getPostStatus = (post: Post): string => {
   return '';
 };
 
-const getDocumentPerommsions = (post: Post): DocumentPermissions => {
+const getDocumentPermissions = (post: Post): DocumentPermissions => {
   // Only allow owners to see a post if it is not published or it's marked as hidden
   if (!post.publishedAt || post.linkAccess == LinkAccess.disabled) {
     return {
@@ -88,7 +88,7 @@ export const mapPostToGlean = (post: Post): Document => ({
   owner: {
     datasourceUserId: post.owner.id,
   },
-  permissions: getDocumentPerommsions(post),
+  permissions: getDocumentPermissions(post),
   createdAt: post.publishedAt ? convertToEpoch(post.publishedAt) : undefined,
   updatedAt: post.updatedAt ? convertToEpoch(post.updatedAt) : undefined,
   viewURL: `https://iterable.slab.com/posts/${post.id}`,
