@@ -4,7 +4,9 @@
   "description": "Sync Slab documents with Glean",
   "type": "module",
   "main": "build/index.js",
-  "license": "UNLICENSED",
+  "author": "Iterable",
+  "homepage": "https://iterable.com/",
+  "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "prebuild": "rimraf ./build",
