@@ -31,7 +31,7 @@ const getPostStatus = (post: Post): string => {
 
 const getDocumentPermissions = (post: Post): DocumentPermissions => {
   // Only allow owners to see a post if it is not published or it's marked as hidden
-  if (!post.publishedAt || post.linkAccess == LinkAccess.disabled) {
+  if (!post.publishedAt || post.linkAccess === LinkAccess.disabled) {
     return {
       allowedUsers: [
         {
@@ -42,7 +42,7 @@ const getDocumentPermissions = (post: Post): DocumentPermissions => {
   }
 
   // Expose to all users if marked as public
-  if (post.linkAccess == LinkAccess.public) {
+  if (post.linkAccess === LinkAccess.public) {
     return {
       allowAnonymousAccess: true,
     };
@@ -70,7 +70,7 @@ const getContentBody = (content: string): string => {
     }
 
     return parsedContent.insert || '';
-  } catch (e) {
+  } catch {
     console.error('Could not parse that body');
   }
 
@@ -106,7 +106,6 @@ const fetchPosts = async () => {
   } catch (error: any) {
     console.error('Unable to fetch posts from Slab');
     console.trace(error?.response?.error);
-    return;
   }
 };
 

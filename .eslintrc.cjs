@@ -7,22 +7,15 @@ module.exports = {
    * this rule stops the eslint config resolver from looking any higher, i.e. any rule specified here is a top-level rule and will be applied
    */
   root: true, // ts-eslint
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
   env: {
-    browser: true,
     es6: true,
-    jest: true,
-    'cypress/globals': true,
   },
   extends: [
     'airbnb-base',
     'prettier',
-    'plugin:flowtype/recommended',
-    'plugin:react/recommended',
-    'plugin:redux-saga/recommended',
-    'plugin:cypress/recommended',
   ],
-  plugins: ['flowtype', 'redux-saga', 'import', 'cypress'],
+  plugins: ['import'],
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
@@ -31,6 +24,7 @@ module.exports = {
       extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
       rules: {
         'consistent-return': 'off',
+        'no-console': 'off',
 
         // https://stackoverflow.com/questions/63961803/eslint-says-all-enums-in-typescript-app-are-already-declared-in-the-upper-scope
         'no-shadow': 'off',
@@ -51,24 +45,7 @@ module.exports = {
     },
   ],
   rules: {
-    'class-methods-use-this': [
-      'error',
-      {
-        exceptMethods: [
-          'render',
-          'getInitialState',
-          'getDefaultProps',
-          'componentWillMount',
-          'componentDidMount',
-          'componentWillReceiveProps',
-          'shouldComponentUpdate',
-          'componentWillUpdate',
-          'componentDidUpdate',
-          'componentWillUnmount',
-        ],
-      },
-    ],
-    'flowtype/no-types-missing-file-annotation': 0,
+    'no-console': 'off',
     'function-paren-newline': 0,
     'import/extensions': 'off',
     'import/named': 'off', // disabled in webpack 4 / eslint upgrade
@@ -94,23 +71,12 @@ module.exports = {
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
     'no-underscore-dangle': 0,
     'prefer-object-spread': 'off', // disabled in webpack 4 / eslint upgrade
-    'react/display-name': 0,
-    'react/jsx-no-target-blank': 'off', // disabled in webpack 4 / eslint upgrade
-    'react/jsx-uses-react': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'off', // disabled in webpack 4 / eslint upgrade
   },
   settings: {
-    react: {
-      version: 'detect',
-    },
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
     'import/resolver': {
-      webpack: {
-        config: 'webpack.dev.js',
-      },
       typescript: {
         alwaysTryTypes: true,
       },

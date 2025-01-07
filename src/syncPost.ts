@@ -11,7 +11,6 @@ const fetchPost = async (postId: string) => {
   } catch (error: any) {
     console.error('Unable to fetch posts from Slab');
     console.trace(error);
-    return;
   }
 };
 

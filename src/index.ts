@@ -1,4 +1,4 @@
-import { CREATE_DATASOURCE, SYNC_USERS, SYNC_POSTS, GET_DOCS_COUNT, IS_TEST } from './constants.js';
+import { CREATE_DATASOURCE, SYNC_USERS, SYNC_POSTS, GET_DOCS_COUNT } from './constants.js';
 import { createDataSource, DataSource } from './datasource.js';
 import { ingestSlabUsers } from './syncUsers.js';
 import { ingestSlabPosts } from './syncPosts.js';

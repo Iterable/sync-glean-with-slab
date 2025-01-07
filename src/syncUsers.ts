@@ -6,7 +6,7 @@ const mapUserToGlean = (user: SlabUser): GleanUser => ({
   name: user.name,
   email: user.email,
   userId: user.id,
-  isActive: !!!user.deactivatedAt,
+  isActive: !user.deactivatedAt,
 });
 
 export const ingestSlabUsers = async (uploadId: string) => {
@@ -21,6 +21,5 @@ export const ingestSlabUsers = async (uploadId: string) => {
   } catch (error) {
     console.error('Unable to fetch users from Slab');
     console.trace(error);
-    return;
   }
 };

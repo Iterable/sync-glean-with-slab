@@ -1,4 +1,4 @@
-import { get, post } from './api.js';
+import { post } from './api.js';
 
 export enum ConnectorType {
   API_CRAWL = 'API_CRAWL',
