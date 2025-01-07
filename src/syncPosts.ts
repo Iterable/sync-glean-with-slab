@@ -64,9 +64,7 @@ const getContentBody = (content: string): string => {
     }
 
     if (Array.isArray(parsedContent)) {
-      const body = parsedContent.map((p) => p.insert).join('');
-      // console.info("Found content", body);
-      return body;
+      return parsedContent.map((p) => p.insert).join('');
     }
 
     return parsedContent.insert || '';
@@ -101,8 +99,7 @@ const filterUnpublished = (post: Post): boolean =>
 const fetchPosts = async () => {
   try {
     console.info('Fetching all posts from Slab');
-    const response = await getPosts();
-    return response;
+    return await getPosts();
   } catch (error: any) {
     console.error('Unable to fetch posts from Slab');
     console.trace(error?.response?.error);

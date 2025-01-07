@@ -1,13 +1,12 @@
-import { addDocument } from "./glean/index.js";
-import { getPost } from "./slab/index.js";
-import { DataSource } from "./datasource.js";
+import { addDocument } from './glean/index.js';
+import { getPost } from './slab/index.js';
+import { DataSource } from './datasource.js';
 import { mapPostToGlean } from './syncPosts.js';
 
 const fetchPost = async (postId: string) => {
   try {
     console.info('Fetching one post from Slab');
-    const response = await getPost(postId);
-    return response;
+    return await getPost(postId);
   } catch (error: any) {
     console.error('Unable to fetch posts from Slab');
     console.trace(error);

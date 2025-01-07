@@ -15,7 +15,7 @@ interface UsersResponse {
   };
 }
 
-const userssQuery = gql`
+const usersQuery = gql`
   {
     organization {
       users(includeDeactivated: true) {
@@ -29,7 +29,7 @@ const userssQuery = gql`
 `;
 
 export const getUsers = async () => {
-  const results = await slabApi.request<UsersResponse>(userssQuery);
+  const results = await slabApi.request<UsersResponse>(usersQuery);
 
   return results.organization.users;
 };
