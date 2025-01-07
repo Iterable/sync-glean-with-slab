@@ -3,7 +3,6 @@ import {
   DataSource as IDataSource,
   CustomDocument,
   DocumentType,
-  RenderPreset,
   setBetaUsers,
 } from './glean/index.js';
 
@@ -27,7 +26,6 @@ const slabIcon =
   homeUrl: `https://${SLAB_WORKSPACE}.slab.com/`,
   iconUrl: slabIcon,
   isTestDatasource: IS_TEST,
-  renderConfigPreset: RenderPreset.GDRIVE,
 };
 
 export const createDataSource = async () => {
