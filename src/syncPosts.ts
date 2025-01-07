@@ -6,7 +6,7 @@ import {
   DocumentPermissions,
   PAGE,
 } from './glean/index.js';
-import { getPosts, LinkAccess, Post, PostContent } from './slab/index.js';
+import { getPostIds, getPosts, LinkAccess, Post, PostContent } from './slab/index.js';
 import { DataSource, PostType } from './datasource.js';
 import { BATCH_SIZE, SLAB_WORKSPACE } from './constants.js';
 
@@ -96,45 +96,59 @@ export const mapPostToGlean = (post: Post): Document => ({
 const filterUnpublished = (post: Post): boolean =>
   Boolean(post.publishedAt) && getContentBody(post.content).length > 0;
 
-const fetchPosts = async () => {
+const fetchPostIds = async () => {
   try {
-    console.info('Fetching all posts from Slab');
-    return await getPosts();
+    console.info('Fetching all post IDs from Slab');
+    return await getPostIds();
+  } catch (error: any) {
+    console.error('Unable to fetch post IDs from Slab');
+    console.trace(error?.response?.error);
+  }
+};
+
+const fetchPosts = async (ids: string[]) => {
+  try {
+    console.info('Fetching some posts from Slab');
+    return await getPosts(ids);
   } catch (error: any) {
     console.error('Unable to fetch posts from Slab');
     console.trace(error?.response?.error);
   }
 };
 
-export const ingestSlabPosts = async (uploadId: string) => {
-  const posts = await fetchPosts();
+const processBatch = async (uploadId: string,  ids: string[], page?: number)=> {
+  const posts = await fetchPosts(ids);
 
   if (!posts) {
     return;
   }
 
-  const batches = chunk(posts.filter(filterUnpublished));
+  return syncDocuments(posts.filter(filterUnpublished).map(mapPostToGlean), DataSource.name, uploadId, page);
+}
+
+export const ingestSlabPosts = async (uploadId: string) => {
+  const postIds = await fetchPostIds();
+
+  if (!postIds) {
+    return;
+  }
+
+  const batches = chunk(postIds);
   const total = batches.length;
 
   // Ensure the first batch is submitted before sending the rest en masse
   const [first, ...rest] = batches;
   console.info(`Syncing Slab posts batch 1 of ${total} to Glean (FIRST)`);
-  let promise = syncDocuments(first.map(mapPostToGlean), DataSource.name, uploadId, PAGE.first);
+  let promise = processBatch(uploadId, first, PAGE.first);
 
   rest.forEach((docs, index) => {
     const oneIndex = index + 2;
     const last = oneIndex === total;
 
     console.info(`Syncing Slab posts batch ${oneIndex} of ${total} to Glean`);
-    promise = promise.then(() =>
-      syncDocuments(
-        docs.map(mapPostToGlean),
-        DataSource.name,
-        uploadId,
-        last ? PAGE.last : undefined,
-      ),
-    );
+    promise = promise.then(() => processBatch(uploadId, docs, last ? PAGE.last : undefined));
   });
+
   await promise;
 
   try {
