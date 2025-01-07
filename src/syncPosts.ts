@@ -8,7 +8,7 @@ import {
 } from './glean/index.js';
 import { getPosts, LinkAccess, Post, PostContent } from './slab/index.js';
 import { DataSource, PostType } from './datasource.js';
-import { BATCH_SIZE } from './constants.js';
+import { BATCH_SIZE, SLAB_WORKSPACE } from './constants.js';
 
 const chunk = <T>(arr: T[], size = BATCH_SIZE) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -91,7 +91,7 @@ export const mapPostToGlean = (post: Post): Document => ({
   permissions: getDocumentPermissions(post),
   createdAt: post.publishedAt ? convertToEpoch(post.publishedAt) : undefined,
   updatedAt: post.updatedAt ? convertToEpoch(post.updatedAt) : undefined,
-  viewURL: `https://iterable.slab.com/posts/${post.id}`,
+  viewURL: `https://${SLAB_WORKSPACE}.slab.com/posts/${post.id}`,
   status: getPostStatus(post),
 });
 

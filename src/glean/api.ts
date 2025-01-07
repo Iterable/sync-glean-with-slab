@@ -1,8 +1,8 @@
 import { got } from 'got';
 
-import { GLEAN_TOKEN } from '../constants.js';
+import { GLEAN_WORKSPACE, GLEAN_TOKEN } from '../constants.js';
 
-const GLEAN_URL = 'https://iterable-be.glean.com/api/index/v1';
+const GLEAN_URL = `https://${GLEAN_WORKSPACE}.glean.com/api/index/v1`;
 
 const gleanUrl = (endpoint: string) => `${GLEAN_URL}/${endpoint}`;
 

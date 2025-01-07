@@ -19,7 +19,9 @@ const getEnvNumber = (key: string, fallback = 20): number => {
   return (Number.isNaN(parsed)) ? fallback : parsed;
 }
 
+export const SLAB_WORKSPACE = process.env.SLAB_WORKSPACE!;
 export const SLAB_TOKEN = process.env.SLAB_TOKEN!;
+export const GLEAN_WORKSPACE = process.env.GLEAN_WORKSPACE!;
 export const GLEAN_TOKEN = process.env.GLEAN_TOKEN!;
 export const BETA_USERS = process.env.BETA_USERS!.split(',');
 export const CREATE_DATASOURCE = getEnvBoolean('CREATE_DATASOURCE');
