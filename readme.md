@@ -60,14 +60,13 @@ This will pull all posts from Slab, filter unpublished posts, then submit them t
 
 ### Additional Documentation
 
-[GraphQL API](https://studio.apollographql.com/public/Slab/variant/current/home)
-[Indexing API](https://developers.glean.com/indexing/overview/#section/Introduction)
+- [Slab GraphQL API](https://studio.apollographql.com/public/Slab/variant/current/home)
+- [Glean Indexing API](https://developers.glean.com/indexing/overview/#section/Introduction)
 
 ## Requirements
 
 - Node 16+
 - Ensure environment variables are set up (either copy `.env.example` to `.env` and fill it out or provide envvars some other way)
-
 
 
 Copyright 2023 Iterable, Inc.
