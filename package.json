@@ -19,11 +19,12 @@
     "start": "node build/index.js"
   },
   "dependencies": {
-    "date-fns": "^2.29.3",
-    "dotenv-safe": "^8.2.0",
-    "got": "^12.5.3",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
+    "dotenv-safe": "^9.1.0",
+    "got": "^14.4.5",
     "graphql": "^16.6.0",
-    "graphql-request": "^5.0.0"
+    "graphql-request": "^7.1.2"
   },
   "devDependencies": {
     "@types/dotenv-safe": "^8.1.2",
