@@ -147,7 +147,7 @@ export const ingestSlabPosts = async (uploadId: string) => {
 
     promise = promise.then(() => {
       console.info(`Syncing Slab posts batch ${oneIndex} of ${total} to Glean`);
-      processBatch(uploadId, docs, last ? PAGE.last : undefined)
+      return processBatch(uploadId, docs, last ? PAGE.last : undefined)
     });
   });
 
